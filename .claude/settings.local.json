@@ -9,7 +9,9 @@
       "Bash(powershell -Command \"Get-Content dashboard.html | Select-Object -First 500\")",
       "Bash(powershell -Command \"Get-Content ''c:\\Users\\soham\\main\\VikramNayak\\Dashboard\\Wire Frame Builder\\dashboard-short.html'' | Select-Object -Skip 42 -First 720\")",
       "Bash(powershell -Command \"Get-Content ''c:\\Users\\soham\\main\\VikramNayak\\Dashboard\\Wire Frame Builder\\dashboard-short.html'' | Select-Object -Skip 44 -First 5\")",
-      "Bash(rm:*)"
+      "Bash(rm:*)",
+      "Bash(powershell -Command \"Get-Content ''c:\\Users\\soham\\main\\VikramNayak\\Dashboard\\Wire Frame Builder\\dashboard_v1.html'' | Select-Object -Last 20\")",
+      "Bash(powershell -Command \"Get-Content ''c:\\Users\\soham\\main\\VikramNayak\\Dashboard\\Wire Frame Builder\\dashboard.html'' | Select-Object -First 20\")"
     ],
     "deny": [],
     "ask": []
