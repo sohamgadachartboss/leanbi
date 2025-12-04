@@ -108,8 +108,8 @@ body {
 
 .toast {
     position: fixed;
-    bottom: 30px;
-    right: 30px;
+    top: 30px;
+    left: 30px;
     background: #333;
     color: white;
     padding: 16px 24px;
@@ -118,7 +118,7 @@ body {
     font-size: 14px;
     z-index: 10000;
     opacity: 0;
-    transform: translateY(20px);
+    transform: translateY(-20px);
     transition: opacity 0.3s, transform 0.3s;
     pointer-events: none;
     max-width: 400px;

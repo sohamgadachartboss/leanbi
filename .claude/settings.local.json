@@ -1,0 +1,17 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(python generate_charts.py:*)",
+      "Bash(pip install:*)",
+      "Bash(python update_json_with_charts.py:*)",
+      "Bash(python:*)",
+      "Bash(dir:*)",
+      "Bash(powershell -Command \"Get-Content dashboard.html | Select-Object -First 500\")",
+      "Bash(powershell -Command \"Get-Content ''c:\\Users\\soham\\main\\VikramNayak\\Dashboard\\Wire Frame Builder\\dashboard-short.html'' | Select-Object -Skip 42 -First 720\")",
+      "Bash(powershell -Command \"Get-Content ''c:\\Users\\soham\\main\\VikramNayak\\Dashboard\\Wire Frame Builder\\dashboard-short.html'' | Select-Object -Skip 44 -First 5\")",
+      "Bash(rm:*)"
+    ],
+    "deny": [],
+    "ask": []
+  }
+}
