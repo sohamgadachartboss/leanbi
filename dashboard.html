@@ -47,6 +47,63 @@
     </script>
     <script src="https://sohamgadachartboss.github.io/leanbi/layout_logic.js"></script>
 
+    <script>
+        // Initialize Chart.js charts after layout renders
+        function initializeCharts() {
+            const chartConfigs = [];
+
+            // Find all chart components in the SPEC
+            Object.keys(SPEC).forEach(key => {
+                if (key.startsWith('tab_')) {
+                    const tab = SPEC[key];
+                    Object.keys(tab).forEach(compKey => {
+                        if (compKey.startsWith('tab_') && compKey.includes('_comp_')) {
+                            const comp = tab[compKey];
+                            if (comp.config && ['bar', 'line', 'pie', 'doughnut'].includes(comp.config.type)) {
+                                chartConfigs.push({
+                                    domId: compKey,
+                                    config: comp.config
+                                });
+                            }
+                        }
+                    });
+                }
+            });
+
+            // Create charts
+            chartConfigs.forEach(({ domId, config }) => {
+                const container = document.getElementById(domId);
+                if (!container) return;
+
+                const contentArea = container.querySelector('.component-content');
+                if (!contentArea) return;
+
+                contentArea.innerHTML = '';
+                const canvas = document.createElement('canvas');
+                canvas.id = domId + '_chart';
+                contentArea.appendChild(canvas);
+
+                new Chart(canvas, {
+                    type: config.type,
+                    data: config.data,
+                    options: config.options
+                });
+            });
+        }
+
+        // Wait for layout to render, then initialize charts
+        const observer = new MutationObserver((mutations, obs) => {
+            const gridContainer = document.getElementById('gridContainer');
+            if (gridContainer && gridContainer.querySelector('.component')) {
+                setTimeout(initializeCharts, 100);
+                obs.disconnect();
+            }
+        });
+
+        observer.observe(document.body, { childList: true, subtree: true });
+        window.addEventListener('load', () => setTimeout(initializeCharts, 500));
+    </script>
+
     <!-- Toast Notification -->
     <div class="toast" id="toast"></div>
 </body>
