@@ -108,7 +108,7 @@ body {
 
 .toast {
     position: fixed;
-    top: 30px;
+    top: 70px;
     left: 30px;
     background: #333;
     color: white;
