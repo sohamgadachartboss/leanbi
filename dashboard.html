@@ -48,60 +48,147 @@
     <script src="https://sohamgadachartboss.github.io/leanbi/layout_logic.js"></script>
 
     <script>
-        // Initialize Chart.js charts after layout renders
-        function initializeCharts() {
-            const chartConfigs = [];
-
-            // Find all chart components in the SPEC
+        // Initialize all components (Charts, KPIs, Tables) after layout renders
+        function initializeComponents() {
             Object.keys(SPEC).forEach(key => {
                 if (key.startsWith('tab_')) {
                     const tab = SPEC[key];
                     Object.keys(tab).forEach(compKey => {
                         if (compKey.startsWith('tab_') && compKey.includes('_comp_')) {
                             const comp = tab[compKey];
-                            if (comp.config && ['bar', 'line', 'pie', 'doughnut'].includes(comp.config.type)) {
-                                chartConfigs.push({
-                                    domId: compKey,
-                                    config: comp.config
-                                });
+                            if (!comp.config || !comp.config.type) return;
+
+                            const container = document.getElementById(compKey);
+                            if (!container) return;
+
+                            const contentArea = container.querySelector('.component-content');
+                            if (!contentArea) return;
+
+                            const configType = comp.config.type;
+
+                            // Render based on component type
+                            if (['bar', 'line', 'pie', 'doughnut'].includes(configType)) {
+                                renderChart(contentArea, compKey, comp.config);
+                            } else if (configType === 'kpi') {
+                                renderKPI(contentArea, comp.config);
+                            } else if (configType === 'table') {
+                                renderTable(contentArea, comp.config);
                             }
                         }
                     });
                 }
             });
+        }
 
-            // Create charts
-            chartConfigs.forEach(({ domId, config }) => {
-                const container = document.getElementById(domId);
-                if (!container) return;
+        // Render Chart.js chart
+        function renderChart(contentArea, domId, config) {
+            contentArea.innerHTML = '';
+            const canvas = document.createElement('canvas');
+            canvas.id = domId + '_chart';
+            contentArea.appendChild(canvas);
 
-                const contentArea = container.querySelector('.component-content');
-                if (!contentArea) return;
-
-                contentArea.innerHTML = '';
-                const canvas = document.createElement('canvas');
-                canvas.id = domId + '_chart';
-                contentArea.appendChild(canvas);
-
-                new Chart(canvas, {
-                    type: config.type,
-                    data: config.data,
-                    options: config.options
-                });
+            new Chart(canvas, {
+                type: config.type,
+                data: config.data,
+                options: config.options
             });
         }
 
-        // Wait for layout to render, then initialize charts
+        // Render KPI card
+        function renderKPI(contentArea, config) {
+            contentArea.innerHTML = '';
+            const kpiDiv = document.createElement('div');
+            kpiDiv.className = 'kpi-container';
+            kpiDiv.style.cssText = 'display:flex;flex-direction:column;align-items:center;justify-content:center;height:100%;padding:10px;text-align:center;';
+
+            // Value with unit
+            const valueDiv = document.createElement('div');
+            valueDiv.style.cssText = 'font-size:2em;font-weight:bold;color:#1f2937;';
+            const unit = config.unit || '';
+            const value = config.value;
+            valueDiv.textContent = unit === '$' ? `$${value.toLocaleString()}` : unit === '%' ? `${value}%` : `${value}${unit ? ' ' + unit : ''}`;
+            kpiDiv.appendChild(valueDiv);
+
+            // Title
+            const titleDiv = document.createElement('div');
+            titleDiv.style.cssText = 'font-size:0.9em;color:#6b7280;margin-top:4px;';
+            titleDiv.textContent = config.title || '';
+            kpiDiv.appendChild(titleDiv);
+
+            // Change indicator
+            if (config.change) {
+                const changeDiv = document.createElement('div');
+                const isPositive = config.trend === 'up' || (typeof config.change === 'string' && config.change.startsWith('+'));
+                changeDiv.style.cssText = `font-size:0.85em;margin-top:8px;color:${isPositive ? '#10b981' : '#ef4444'};`;
+                const arrow = isPositive ? '↑' : '↓';
+                changeDiv.textContent = `${arrow} ${config.change}`;
+                if (config.comparison) {
+                    changeDiv.textContent += ` ${config.comparison}`;
+                }
+                kpiDiv.appendChild(changeDiv);
+            }
+
+            // Subtitle
+            if (config.subtitle) {
+                const subtitleDiv = document.createElement('div');
+                subtitleDiv.style.cssText = `font-size:0.8em;margin-top:4px;color:${config.subtitle_color || '#6b7280'};`;
+                subtitleDiv.textContent = config.subtitle;
+                kpiDiv.appendChild(subtitleDiv);
+            }
+
+            contentArea.appendChild(kpiDiv);
+        }
+
+        // Render Table
+        function renderTable(contentArea, config) {
+            contentArea.innerHTML = '';
+            const tableWrapper = document.createElement('div');
+            tableWrapper.style.cssText = 'width:100%;height:100%;overflow:auto;';
+
+            const table = document.createElement('table');
+            table.style.cssText = 'width:100%;border-collapse:collapse;font-size:0.8em;';
+
+            // Header
+            const thead = document.createElement('thead');
+            const headerRow = document.createElement('tr');
+            (config.columns || []).forEach(col => {
+                const th = document.createElement('th');
+                th.style.cssText = 'padding:8px;text-align:left;border-bottom:2px solid #e5e7eb;background:#f9fafb;font-weight:600;color:#374151;';
+                th.textContent = col;
+                headerRow.appendChild(th);
+            });
+            thead.appendChild(headerRow);
+            table.appendChild(thead);
+
+            // Body
+            const tbody = document.createElement('tbody');
+            (config.rows || []).forEach(row => {
+                const tr = document.createElement('tr');
+                row.forEach((cell, idx) => {
+                    const td = document.createElement('td');
+                    td.style.cssText = 'padding:8px;border-bottom:1px solid #e5e7eb;color:#4b5563;';
+                    td.textContent = cell;
+                    tr.appendChild(td);
+                });
+                tbody.appendChild(tr);
+            });
+            table.appendChild(tbody);
+
+            tableWrapper.appendChild(table);
+            contentArea.appendChild(tableWrapper);
+        }
+
+        // Wait for layout to render, then initialize components
         const observer = new MutationObserver((mutations, obs) => {
             const gridContainer = document.getElementById('gridContainer');
             if (gridContainer && gridContainer.querySelector('.component')) {
-                setTimeout(initializeCharts, 100);
+                setTimeout(initializeComponents, 100);
                 obs.disconnect();
             }
         });
 
         observer.observe(document.body, { childList: true, subtree: true });
-        window.addEventListener('load', () => setTimeout(initializeCharts, 500));
+        window.addEventListener('load', () => setTimeout(initializeComponents, 500));
     </script>
 
     <!-- Toast Notification -->
